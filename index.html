@@ -668,15 +668,15 @@ function doPost(e) {
                         bets: []
                     },
                     availableModels: [
-                        { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Default)' },
-                        { id: 'gemini-1.5-flash-latest', name: 'Gemini 1.5 Flash (Latest)' },
-                        { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
-                        { id: 'gemini-1.5-pro-latest', name: 'Gemini 1.5 Pro (Latest)' },
-                        { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Exp)' },
-                        { id: 'gemini-pro', name: 'Gemini 1.0 Pro (Legacy)' }
-                    ],
-                    selectedModel: 'gemini-1.5-flash',
-                    allowExportAnyway: false
+                        availableModels: [
+                            { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
+                            { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (New)' },
+                            { id: 'gemini-2.0-flash-lite-001', name: 'Gemini 2.0 Flash Lite' },
+                            { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
+                            { id: 'gemini-2.0-pro-exp-02-05', name: 'Gemini 2.0 Pro (Exp)' }
+                        ],
+                        selectedModel: 'gemini-2.0-flash',
+                        allowExportAnyway: false
                 }
             },
             watch: {
