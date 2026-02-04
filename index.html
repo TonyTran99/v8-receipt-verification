@@ -691,8 +691,9 @@ function doPost(e) {
                 diff() { return (this.form.total_amount || 0) - this.sumBets; }
             },
             methods: {
-                async testConnection() {
-                    if (!this.apiKey) return alert("Vui lòng nhập API Key trước!");
+                async testConnection(silent = false) {
+                    if (!this.apiKey && !silent) return alert("Vui lòng nhập API Key trước!");
+                    if (!this.apiKey && silent) return;
                     try {
                         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey.trim()}`);
                         const data = await res.json();
@@ -711,11 +712,11 @@ function doPost(e) {
                         else if (validModels.length > 0) this.selectedModel = validModels[0];
 
                         let msg = "Kết nối THÀNH CÔNG! ✅\n\nDanh sách Model đã được cập nhật tự động theo Key của bạn.\n\nHãy nhấn Đóng và thử lại.";
-                        alert(msg);
+                        if (!silent) alert(msg);
                         console.log("Updated Available Models:", validModels);
 
                     } catch (e) {
-                        alert("Kết nối THẤT BẠI ❌\nLỗi: " + e.message + "\n\nKiểm tra lại Internet hoặc API Key.");
+                        if (!silent) alert("Kết nối THẤT BẠI ❌\nLỗi: " + e.message + "\n\nKiểm tra lại Internet hoặc API Key.");
                     }
                 },
                 // Image Handling
