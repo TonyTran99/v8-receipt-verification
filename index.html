@@ -682,6 +682,26 @@ function doPost(e) {
                 diff() { return (this.form.total_amount || 0) - this.sumBets; }
             },
             methods: {
+                async testConnection() {
+                    if (!this.apiKey) return alert("Vui lòng nhập API Key trước!");
+                    try {
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey.trim()}`);
+                        const data = await res.json();
+
+                        if (data.error) throw new Error(data.error.message);
+                        if (!data.models) throw new Error("Không tìm thấy danh sách model.");
+
+                        const validModels = data.models.filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+                            .map(m => m.name.replace('models/', ''));
+
+                        let msg = "Kết nối THÀNH CÔNG! ✅\n\nCác Model khả dụng cho Key của bạn:\n" + validModels.join('\n');
+                        alert(msg);
+                        console.log("Available Models:", validModels);
+
+                    } catch (e) {
+                        alert("Kết nối THẤT BẠI ❌\nLỗi: " + e.message + "\n\nKiểm tra lại Internet hoặc API Key.");
+                    }
+                },
                 // Image Handling
                 async handleFileUpload(e) {
                     const file = e.target.files[0];
