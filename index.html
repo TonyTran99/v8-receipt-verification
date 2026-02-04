@@ -662,6 +662,15 @@ function doPost(e) {
                         receiver_name: '', receiver_bank: '', receiver_account: '',
                         bets: []
                     },
+                    availableModels: [
+                        { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Default)' },
+                        { id: 'gemini-1.5-flash-latest', name: 'Gemini 1.5 Flash (Latest)' },
+                        { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
+                        { id: 'gemini-1.5-pro-latest', name: 'Gemini 1.5 Pro (Latest)' },
+                        { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Exp)' },
+                        { id: 'gemini-pro', name: 'Gemini 1.0 Pro (Legacy)' }
+                    ],
+                    selectedModel: 'gemini-1.5-flash',
                     allowExportAnyway: false
                 }
             },
@@ -794,6 +803,9 @@ function doPost(e) {
 
                         if (error.name === 'TypeError' && error.message.includes('fetch')) {
                             throw new Error("Lỗi kết nối mạng hoặc CORS. Kiểm tra lại Key hoặc mở bằng Live Server.");
+                        }
+                        if (error.message.includes('not found') || error.message.includes('404')) {
+                            throw new Error("Lỗi Model không tìm thấy hoặc chưa được cấp quyền cho Key này. \n\nHãy thử chọn MODEL khác ở góc trên (ví dụ: Gemini 1.5 Pro hoặc Gemini 1.0 Pro).");
                         }
                         throw error;
                     }
