@@ -841,7 +841,7 @@ function doPost(e) {
                             throw new Error("Lỗi kết nối mạng hoặc CORS. Kiểm tra lại Key hoặc mở bằng Live Server.");
                         }
                         if (error.message.includes('not found') || error.message.includes('404')) {
-                            throw new Error("Lỗi Model không tìm thấy hoặc chưa được cấp quyền cho Key này. \n\nHãy thử chọn MODEL khác ở góc trên (ví dụ: Gemini 1.5 Pro hoặc Gemini 1.0 Pro).");
+                            throw new Error(`Google API không tìm thấy model: ${this.selectedModel} (404). \nKey của bạn có thể bị hạn chế quyền truy cập model này.`);
                         }
                         throw error;
                     }
