@@ -701,11 +701,15 @@ function doPost(e) {
                         const validModels = data.models.filter(m => m.supportedGenerationMethods?.includes('generateContent'))
                             .map(m => m.name.replace('models/', ''));
 
-                        // FORCE INJECT 1.5 Flash (Stability Fix)
-                        if (!validModels.includes('gemini-1.5-flash')) {
-                            // Ensure the stable model is always available
-                            validModels.unshift('gemini-1.5-flash');
-                        }
+                        // FORCE INJECT SAFE MODELS (Shotgun approach)
+                        const safeModels = ['gemini-1.5-flash', 'gemini-1.5-flash-001', 'gemini-1.5-flash-latest', 'gemini-1.5-pro', 'gemini-pro'];
+
+                        // Add them to the top of the list if missing
+                        safeModels.reverse().forEach(model => {
+                            if (!validModels.includes(model)) {
+                                validModels.unshift(model);
+                            }
+                        });
 
                         this.availableModels = validModels.map(id => ({ id: id, name: id.toUpperCase() }));
                         this.selectedModel = 'gemini-1.5-flash';
