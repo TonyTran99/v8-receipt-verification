@@ -668,90 +668,90 @@ function doPost(e) {
                         bets: []
                     },
                     availableModels: [
-                        availableModels: [
-                            { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
-                            { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (New)' },
-                            { id: 'gemini-2.0-flash-lite-001', name: 'Gemini 2.0 Flash Lite' },
-                            { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
-                            { id: 'gemini-2.0-pro-exp-02-05', name: 'Gemini 2.0 Pro (Exp)' }
-                        ],
-                        selectedModel: 'gemini-2.0-flash',
-                        allowExportAnyway: false
+                        { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
+                        { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (New)' },
+                        { id: 'gemini-2.0-flash-lite-001', name: 'Gemini 2.0 Flash Lite' },
+                        { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
+                        { id: 'gemini-2.0-pro-exp-02-05', name: 'Gemini 2.0 Pro (Exp)' }
+                    ],
+                    selectedModel: 'gemini-2.0-flash',
+                    allowExportAnyway: false
                 }
             },
+        },
             watch: {
-                apiKey(newVal) { if (newVal) localStorage.setItem('gemini_api_key', newVal.trim()); }
-            },
+            apiKey(newVal) { if (newVal) localStorage.setItem('gemini_api_key', newVal.trim()); }
+        },
             computed: {
-                sumBets() { return this.form.bets.reduce((acc, b) => acc + (b.amount_k || 0) * 1000, 0); },
-                diff() { return (this.form.total_amount || 0) - this.sumBets; }
-            },
+            sumBets() { return this.form.bets.reduce((acc, b) => acc + (b.amount_k || 0) * 1000, 0); },
+            diff() { return (this.form.total_amount || 0) - this.sumBets; }
+        },
             methods: {
-                async testConnection() {
-                    if (!this.apiKey) return alert("Vui lòng nhập API Key trước!");
-                    try {
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey.trim()}`);
-                        const data = await res.json();
+            async testConnection() {
+                if (!this.apiKey) return alert("Vui lòng nhập API Key trước!");
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey.trim()}`);
+                    const data = await res.json();
 
-                        if (data.error) throw new Error(data.error.message);
-                        if (!data.models) throw new Error("Không tìm thấy danh sách model.");
+                    if (data.error) throw new Error(data.error.message);
+                    if (!data.models) throw new Error("Không tìm thấy danh sách model.");
 
-                        const validModels = data.models.filter(m => m.supportedGenerationMethods?.includes('generateContent'))
-                            .map(m => m.name.replace('models/', ''));
+                    const validModels = data.models.filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+                        .map(m => m.name.replace('models/', ''));
 
-                        // Auto-update the list
-                        this.availableModels = validModels.map(id => ({ id: id, name: id.toUpperCase() }));
+                    // Auto-update the list
+                    this.availableModels = validModels.map(id => ({ id: id, name: id.toUpperCase() }));
 
-                        // Select the best common model if available
-                        if (validModels.includes('gemini-1.5-flash')) this.selectedModel = 'gemini-1.5-flash';
-                        else if (validModels.length > 0) this.selectedModel = validModels[0];
+                    // Select the best common model if available
+                    if (validModels.includes('gemini-1.5-flash')) this.selectedModel = 'gemini-1.5-flash';
+                    else if (validModels.length > 0) this.selectedModel = validModels[0];
 
-                        let msg = "Kết nối THÀNH CÔNG! ✅\n\nDanh sách Model đã được cập nhật tự động theo Key của bạn.\n\nHãy nhấn Đóng và thử lại.";
-                        alert(msg);
-                        console.log("Updated Available Models:", validModels);
+                    let msg = "Kết nối THÀNH CÔNG! ✅\n\nDanh sách Model đã được cập nhật tự động theo Key của bạn.\n\nHãy nhấn Đóng và thử lại.";
+                    alert(msg);
+                    console.log("Updated Available Models:", validModels);
 
-                    } catch (e) {
-                        alert("Kết nối THẤT BẠI ❌\nLỗi: " + e.message + "\n\nKiểm tra lại Internet hoặc API Key.");
-                    }
-                },
-                // Image Handling
-                async handleFileUpload(e) {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    this.processFile(file);
-                },
-                handleDrop(e) {
-                    this.dragOver = false;
-                    const file = e.dataTransfer.files[0];
-                    if (file && file.type.startsWith('image/')) this.processFile(file);
-                },
-                async processFile(file) {
-                    this.errorMessage = '';
-                    this.allowExportAnyway = false;
+                } catch (e) {
+                    alert("Kết nối THẤT BẠI ❌\nLỗi: " + e.message + "\n\nKiểm tra lại Internet hoặc API Key.");
+                }
+            },
+            // Image Handling
+            async handleFileUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                this.processFile(file);
+            },
+            handleDrop(e) {
+                this.dragOver = false;
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) this.processFile(file);
+            },
+            async processFile(file) {
+                this.errorMessage = '';
+                this.allowExportAnyway = false;
 
-                    if (!this.apiKey || !this.apiKey.trim().startsWith('AIza')) {
-                        this.errorMessage = "Vui lòng nhập Gemini API Key hợp lệ (bắt đầu bằng AIza) ở góc trên màn hình.";
-                        return;
-                    }
+                if (!this.apiKey || !this.apiKey.trim().startsWith('AIza')) {
+                    this.errorMessage = "Vui lòng nhập Gemini API Key hợp lệ (bắt đầu bằng AIza) ở góc trên màn hình.";
+                    return;
+                }
 
-                    this.imageSrc = URL.createObjectURL(file);
-                    this.resetZoom();
-                    this.isProcessing = true;
+                this.imageSrc = URL.createObjectURL(file);
+                this.resetZoom();
+                this.isProcessing = true;
 
-                    try {
-                        const base64Image = await this.fileToGenerativePart(file);
-                        await this.analyzeImage(base64Image);
-                    } catch (error) {
-                        console.error(error);
-                        this.errorMessage = `Lỗi hệ thống: ${error.message}`;
-                    } finally {
-                        this.isProcessing = false;
-                    }
-                },
+                try {
+                    const base64Image = await this.fileToGenerativePart(file);
+                    await this.analyzeImage(base64Image);
+                } catch (error) {
+                    console.error(error);
+                    this.errorMessage = `Lỗi hệ thống: ${error.message}`;
+                } finally {
+                    this.isProcessing = false;
+                }
+            },
 
-                // AI Logic
-                async analyzeImage(imagePart) {
-                    const promptText = `
+            // AI Logic
+            async analyzeImage(imagePart) {
+                const promptText = `
                     Bạn là một trợ lý AI chuyên xử lý biên lai cá cược. 
                     Nhiệm vụ: Trích xuất thông tin JSON CHÍNH XÁC TUYỆT ĐỐI từ ảnh.
                     
@@ -773,175 +773,175 @@ function doPost(e) {
                     }
                     `;
 
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey.trim()}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey.trim()}`;
 
-                    try {
-                        const response = await fetch(url, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: promptText }, imagePart] }]
-                            })
-                        });
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: promptText }, imagePart] }]
+                        })
+                    });
 
-                        if (!response.ok) {
-                            const errorBody = await response.text();
-                            let errorMsg = `Lỗi ${response.status}: ${response.statusText}`;
-                            try {
-                                const errJson = JSON.parse(errorBody);
-                                if (errJson.error && errJson.error.message) {
-                                    errorMsg = `Google AI Error: ${errJson.error.message}`;
-                                }
-                            } catch (e) { }
-                            throw new Error(errorMsg);
-                        }
-
-                        const data = await response.json();
-                        if (!data.candidates || !data.candidates.length) {
-                            if (data.promptFeedback && data.promptFeedback.blockReason) {
-                                throw new Error(`AI từ chối xử lý: ${data.promptFeedback.blockReason}. Hãy thử ảnh khác.`);
-                            }
-                            throw new Error("AI không trả về kết quả (Phản hồi trống).");
-                        }
-
-                        let text = data.candidates[0].content.parts[0].text;
-                        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-
-                        let result;
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        let errorMsg = `Lỗi ${response.status}: ${response.statusText}`;
                         try {
-                            result = JSON.parse(text);
-                        } catch (e) {
-                            console.error("Non-JSON Response:", text);
-                            throw new Error("AI trả về định dạng sai (Không phải JSON). Hãy thử lại.");
-                        }
-
-                        // Apply to Form
-                        this.form = {
-                            sender_name: result.sender_name || '',
-                            transaction_date: result.transaction_date || new Date().toISOString().slice(0, 16),
-                            total_amount: result.total_amount || 0,
-                            receiver_name: result.receiver_name || '',
-                            receiver_bank: result.receiver_bank || '',
-                            receiver_account: result.receiver_account || '',
-                            bets: result.bets || []
-                        };
-                    } catch (error) {
-                        console.error("Full Error:", error);
-                        // Specific check for file protocol which causes CORS/Fetch errors
-                        if (window.location.protocol === 'file:') {
-                            this.errorMessage = `LỖI GIAO THỨC FILE:// \n\nBạn đang mở file trực tiếp từ ổ cứng. Trình duyệt chặn kết nối API vì lý do bảo mật (CORS).\n\nCÁCH KHẮC PHỤC:\n1. Cài đặt Extension "Live Server" trong VS Code.\n2. Chuột phải vào file index.html -> chọn "Open with Live Server".\n3. Hoặc chạy lệnh Python: python -m http.server`;
-                            return;
-                        }
-
-                        if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                            throw new Error("Lỗi kết nối mạng hoặc CORS. Kiểm tra lại Key hoặc mở bằng Live Server.");
-                        }
-                        if (error.message.includes('not found') || error.message.includes('404')) {
-                            throw new Error("Lỗi Model không tìm thấy hoặc chưa được cấp quyền cho Key này. \n\nHãy thử chọn MODEL khác ở góc trên (ví dụ: Gemini 1.5 Pro hoặc Gemini 1.0 Pro).");
-                        }
-                        throw error;
+                            const errJson = JSON.parse(errorBody);
+                            if (errJson.error && errJson.error.message) {
+                                errorMsg = `Google AI Error: ${errJson.error.message}`;
+                            }
+                        } catch (e) { }
+                        throw new Error(errorMsg);
                     }
-                },
 
-                // Utils
-                fileToGenerativePart(file) {
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve({ inlineData: { data: reader.result.split(',')[1], mimeType: file.type } });
-                        reader.readAsDataURL(file);
-                    });
-                },
-                formatCurrency(val) { return val ? val.toLocaleString('vi-VN') : '0'; },
-                updateTotalAmount(e) {
-                    const clean = e.target.value.replace(/[^0-9]/g, '');
-                    this.form.total_amount = clean ? parseInt(clean) : 0;
-                },
-
-                // Bets Management
-                addBet(animal) {
-                    this.form.bets.unshift({ code: animal.code, common_name: animal.common, matched_text: 'Thêm tay', amount_k: 0 });
-                },
-                removeBet(idx) { this.form.bets.splice(idx, 1); },
-
-                // UI Controls
-                resetApp() {
-                    this.imageSrc = null; this.form = { sender_name: '', transaction_date: '', total_amount: 0, bets: [] };
-                    this.errorMessage = '';
-                },
-                zoomIn() { if (this.zoomLevel < 300) this.zoomLevel += 25; },
-                zoomOut() { if (this.zoomLevel > 50) this.zoomLevel -= 25; },
-                resetZoom() { this.zoomLevel = 100; this.rotation = 0; },
-
-                // Export
-                copyScript() {
-                    const code = document.getElementById('scriptCode').innerText;
-                    navigator.clipboard.writeText(code).then(() => alert("Đã copy mã script!"));
-                },
-                saveSheetConfig() {
-                    if (!this.sheetDbUrl) return alert("Vui lòng nhập URL Web App!");
-                    localStorage.setItem('sheet_db_url', this.sheetDbUrl.trim());
-                    this.showSheetConfig = false;
-                    alert("Đã lưu cấu hình!");
-                },
-                async exportAction() {
-                    if (this.sheetDbUrl) {
-                        await this.exportToGoogleSheet();
-                    } else {
-                        if (confirm("Bạn chưa cấu hình Google Sheets. Tải về file CSV để lưu trữ?")) {
-                            this.downloadExcel();
+                    const data = await response.json();
+                    if (!data.candidates || !data.candidates.length) {
+                        if (data.promptFeedback && data.promptFeedback.blockReason) {
+                            throw new Error(`AI từ chối xử lý: ${data.promptFeedback.blockReason}. Hãy thử ảnh khác.`);
                         }
+                        throw new Error("AI không trả về kết quả (Phản hồi trống).");
                     }
-                },
-                async exportToGoogleSheet() {
-                    if (!this.sheetDbUrl) { this.showSheetConfig = true; return; }
 
-                    const payload = {
-                        transaction_date: this.form.transaction_date,
-                        sender_name: this.form.sender_name,
-                        total_amount: this.form.total_amount,
-                        bets: this.form.bets,
-                        is_valid: this.diff === 0,
-                        diff: this.diff
-                    };
+                    let text = data.candidates[0].content.parts[0].text;
+                    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
 
+                    let result;
                     try {
-                        const btn = document.querySelector('button[title="Kết nối Google Sheets"]'); // visualization only
-
-                        // Use no-cors mode for Google Apps Script Web App
-                        await fetch(this.sheetDbUrl, {
-                            method: 'POST',
-                            mode: 'no-cors', // Opaque response
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-
-                        // Since no-cors doesn't give status, we assume success if no network error.
-                        // Ideally we'd use CORS but GAS requires redirect logic which is complex in pure client-side without proxy.
-                        alert("Đã gửi yêu cầu lưu dữ liệu! (Hãy kiểm tra Google Sheet)");
-
+                        result = JSON.parse(text);
                     } catch (e) {
-                        alert("Lỗi gửi dữ liệu: " + e.message);
+                        console.error("Non-JSON Response:", text);
+                        throw new Error("AI trả về định dạng sai (Không phải JSON). Hãy thử lại.");
                     }
-                },
-                downloadExcel() {
-                    let csvContent = "\uFEFFNgày,Người Gửi,Tổng Tiền,Mã,Con Vật,Cược (k),Thành Tiền\n";
-                    const dateStr = this.form.transaction_date.replace('T', ' ');
-                    this.form.bets.forEach(b => {
-                        const row = [
-                            `"${dateStr}"`, `"${this.form.sender_name}"`, this.form.total_amount,
-                            `'${b.code}`, `"${b.common_name}"`, b.amount_k, b.amount_k * 1000
-                        ];
-                        csvContent += row.join(",") + "\n";
+
+                    // Apply to Form
+                    this.form = {
+                        sender_name: result.sender_name || '',
+                        transaction_date: result.transaction_date || new Date().toISOString().slice(0, 16),
+                        total_amount: result.total_amount || 0,
+                        receiver_name: result.receiver_name || '',
+                        receiver_bank: result.receiver_bank || '',
+                        receiver_account: result.receiver_account || '',
+                        bets: result.bets || []
+                    };
+                } catch (error) {
+                    console.error("Full Error:", error);
+                    // Specific check for file protocol which causes CORS/Fetch errors
+                    if (window.location.protocol === 'file:') {
+                        this.errorMessage = `LỖI GIAO THỨC FILE:// \n\nBạn đang mở file trực tiếp từ ổ cứng. Trình duyệt chặn kết nối API vì lý do bảo mật (CORS).\n\nCÁCH KHẮC PHỤC:\n1. Cài đặt Extension "Live Server" trong VS Code.\n2. Chuột phải vào file index.html -> chọn "Open with Live Server".\n3. Hoặc chạy lệnh Python: python -m http.server`;
+                        return;
+                    }
+
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        throw new Error("Lỗi kết nối mạng hoặc CORS. Kiểm tra lại Key hoặc mở bằng Live Server.");
+                    }
+                    if (error.message.includes('not found') || error.message.includes('404')) {
+                        throw new Error("Lỗi Model không tìm thấy hoặc chưa được cấp quyền cho Key này. \n\nHãy thử chọn MODEL khác ở góc trên (ví dụ: Gemini 1.5 Pro hoặc Gemini 1.0 Pro).");
+                    }
+                    throw error;
+                }
+            },
+
+            // Utils
+            fileToGenerativePart(file) {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve({ inlineData: { data: reader.result.split(',')[1], mimeType: file.type } });
+                    reader.readAsDataURL(file);
+                });
+            },
+            formatCurrency(val) { return val ? val.toLocaleString('vi-VN') : '0'; },
+            updateTotalAmount(e) {
+                const clean = e.target.value.replace(/[^0-9]/g, '');
+                this.form.total_amount = clean ? parseInt(clean) : 0;
+            },
+
+            // Bets Management
+            addBet(animal) {
+                this.form.bets.unshift({ code: animal.code, common_name: animal.common, matched_text: 'Thêm tay', amount_k: 0 });
+            },
+            removeBet(idx) { this.form.bets.splice(idx, 1); },
+
+            // UI Controls
+            resetApp() {
+                this.imageSrc = null; this.form = { sender_name: '', transaction_date: '', total_amount: 0, bets: [] };
+                this.errorMessage = '';
+            },
+            zoomIn() { if (this.zoomLevel < 300) this.zoomLevel += 25; },
+            zoomOut() { if (this.zoomLevel > 50) this.zoomLevel -= 25; },
+            resetZoom() { this.zoomLevel = 100; this.rotation = 0; },
+
+            // Export
+            copyScript() {
+                const code = document.getElementById('scriptCode').innerText;
+                navigator.clipboard.writeText(code).then(() => alert("Đã copy mã script!"));
+            },
+            saveSheetConfig() {
+                if (!this.sheetDbUrl) return alert("Vui lòng nhập URL Web App!");
+                localStorage.setItem('sheet_db_url', this.sheetDbUrl.trim());
+                this.showSheetConfig = false;
+                alert("Đã lưu cấu hình!");
+            },
+            async exportAction() {
+                if (this.sheetDbUrl) {
+                    await this.exportToGoogleSheet();
+                } else {
+                    if (confirm("Bạn chưa cấu hình Google Sheets. Tải về file CSV để lưu trữ?")) {
+                        this.downloadExcel();
+                    }
+                }
+            },
+            async exportToGoogleSheet() {
+                if (!this.sheetDbUrl) { this.showSheetConfig = true; return; }
+
+                const payload = {
+                    transaction_date: this.form.transaction_date,
+                    sender_name: this.form.sender_name,
+                    total_amount: this.form.total_amount,
+                    bets: this.form.bets,
+                    is_valid: this.diff === 0,
+                    diff: this.diff
+                };
+
+                try {
+                    const btn = document.querySelector('button[title="Kết nối Google Sheets"]'); // visualization only
+
+                    // Use no-cors mode for Google Apps Script Web App
+                    await fetch(this.sheetDbUrl, {
+                        method: 'POST',
+                        mode: 'no-cors', // Opaque response
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
                     });
 
-                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement("a");
-                    link.href = url;
-                    link.download = `V8_DoiSoat_${this.form.sender_name || 'Receipt'}.csv`;
-                    link.click();
+                    // Since no-cors doesn't give status, we assume success if no network error.
+                    // Ideally we'd use CORS but GAS requires redirect logic which is complex in pure client-side without proxy.
+                    alert("Đã gửi yêu cầu lưu dữ liệu! (Hãy kiểm tra Google Sheet)");
+
+                } catch (e) {
+                    alert("Lỗi gửi dữ liệu: " + e.message);
                 }
+            },
+            downloadExcel() {
+                let csvContent = "\uFEFFNgày,Người Gửi,Tổng Tiền,Mã,Con Vật,Cược (k),Thành Tiền\n";
+                const dateStr = this.form.transaction_date.replace('T', ' ');
+                this.form.bets.forEach(b => {
+                    const row = [
+                        `"${dateStr}"`, `"${this.form.sender_name}"`, this.form.total_amount,
+                        `'${b.code}`, `"${b.common_name}"`, b.amount_k, b.amount_k * 1000
+                    ];
+                    csvContent += row.join(",") + "\n";
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `V8_DoiSoat_${this.form.sender_name || 'Receipt'}.csv`;
+                link.click();
             }
+        }
         }).mount('#app');
     </script>
 </body>
