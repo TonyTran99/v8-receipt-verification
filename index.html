@@ -701,14 +701,14 @@ function doPost(e) {
                         const validModels = data.models.filter(m => m.supportedGenerationMethods?.includes('generateContent'))
                             .map(m => m.name.replace('models/', ''));
 
-                        // Auto-update the list only if valid models are found
-                        if (validModels.length > 0) {
-                            this.availableModels = validModels.map(id => ({ id: id, name: id.toUpperCase() }));
-
-                            // Select the best common model if available
-                            if (validModels.includes('gemini-1.5-flash')) this.selectedModel = 'gemini-1.5-flash';
-                            else this.selectedModel = validModels[0];
+                        // FORCE INJECT 1.5 Flash (Stability Fix)
+                        if (!validModels.includes('gemini-1.5-flash')) {
+                            // Ensure the stable model is always available
+                            validModels.unshift('gemini-1.5-flash');
                         }
+
+                        this.availableModels = validModels.map(id => ({ id: id, name: id.toUpperCase() }));
+                        this.selectedModel = 'gemini-1.5-flash';
 
                         let msg = "Kết nối THÀNH CÔNG! ✅\n\nDanh sách Model đã được cập nhật tự động theo Key của bạn.\n\nHãy nhấn Đóng và thử lại.";
                         if (!silent) alert(msg);
